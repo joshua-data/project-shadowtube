@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShadowTube — YouTube 영어 쉐도잉</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-card: #1a1a26;
+    --bg-elevated: #222233;
+    --accent: #6366f1;
+    --accent-light: #818cf8;
+    --accent-glow: rgba(99, 102, 241, 0.15);
+    --accent-glow-strong: rgba(99, 102, 241, 0.3);
+    --text-primary: #e8e8f0;
+    --text-secondary: #9898b0;
+    --text-muted: #5a5a72;
+    --border: #2a2a3a;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --kr-accent: #38bdf8;
+    --expression-bg: #1e1b2e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'IBM Plex Sans KR', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── Background atmosphere ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 20%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(56, 189, 248, 0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── Header ─── */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10, 10, 15, 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--kr-accent));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .logo span {
+    background: linear-gradient(135deg, var(--accent-light), var(--kr-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .header-btn:hover {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+  }
+
+  /* ─── URL Input Section ─── */
+  .url-section {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 24px;
+    text-align: center;
+    transition: all 0.5s ease;
+  }
+
+  .url-section.minimized {
+    padding: 16px 24px;
+  }
+
+  .url-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+    transition: all 0.5s ease;
+  }
+
+  .url-section.minimized .url-title,
+  .url-section.minimized .url-subtitle {
+    display: none;
+  }
+
+  .url-subtitle {
+    color: var(--text-secondary);
+    font-size: 15px;
+    margin-bottom: 28px;
+    font-weight: 300;
+  }
+
+  .url-input-wrapper {
+    display: flex;
+    gap: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 6px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .url-input-wrapper:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .url-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    padding: 12px 16px;
+    outline: none;
+  }
+
+  .url-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .url-submit {
+    background: linear-gradient(135deg, var(--accent), #7c3aed);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+
+  .url-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+  }
+
+  /* ─── Main Content ─── */
+  .main-content {
+    display: none;
+    position: relative;
+    z-index: 1;
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
+    gap: 24px;
+  }
+
+  .main-content.active {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    animation: fadeUp 0.6s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── Video Section ─── */
+  .video-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .video-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    background: var(--bg-card);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .video-container iframe,
+  .video-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .video-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 48px;
+    gap: 12px;
+  }
+
+  .video-placeholder span {
+    font-size: 14px;
+  }
+
+  /* ─── Playback Controls ─── */
+  .controls-bar {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .control-group-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+
+  .ctrl-btn {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ctrl-btn:hover {
+    background: var(--accent-glow);
+    border-color: var(--accent);
+    color: var(--text-primary);
+  }
+
+  .ctrl-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .ctrl-btn.icon-btn {
+    padding: 8px 10px;
+    font-size: 16px;
+  }
+
+  .divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+    margin: 0 4px;
+  }
+
+  .speed-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent-light);
+    min-width: 40px;
+    text-align: center;
+  }
+
+  /* ─── Subtitle Display ─── */
+  .subtitle-overlay {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 10px;
+    position: relative;
+  }
+
+  .subtitle-en {
+    font-family: 'Outfit', sans-serif;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: -0.3px;
+    transition: opacity 0.3s;
+  }
+
+  .subtitle-en .highlight {
+    color: var(--accent-light);
+    background: var(--accent-glow);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  .subtitle-kr {
+    font-size: 15px;
+    color: var(--kr-accent);
+    font-weight: 400;
+    opacity: 0.85;
+    transition: opacity 0.3s;
+  }
+
+  .subtitle-hidden {
+    opacity: 0 !important;
+  }
+
+  .subtitle-badge {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    display: flex;
+    gap: 6px;
+  }
+
+  .badge {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .badge-en {
+    background: var(--accent-glow);
+    color: var(--accent-light);
+    border-color: var(--accent);
+  }
+
+  .badge-kr {
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--kr-accent);
+    border-color: var(--kr-accent);
+  }
+
+  .badge.off {
+    opacity: 0.3;
+    border-color: transparent;
+  }
+
+  /* ─── Right Panel ─── */
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: calc(100vh - 100px);
+    position: sticky;
+    top: 76px;
+  }
+
+  /* ─── Segment List ─── */
+  .segment-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title .icon {
+    font-size: 16px;
+  }
+
+  .panel-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--bg-elevated);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  .segment-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+  }
+
+  .segment-list::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .segment-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .segment-list::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+
+  .segment-item {
+    padding: 14px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    margin-bottom: 4px;
+  }
+
+  .segment-item:hover {
+    background: var(--bg-elevated);
+  }
+
+  .segment-item.active {
+    background: var(--accent-glow);
+    border-color: rgba(99, 102, 241, 0.3);
+  }
+
+  .segment-item.completed {
+    border-left: 3px solid var(--success);
+  }
+
+  .segment-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .segment-time .repeat-count {
+    color: var(--accent-light);
+    font-size: 10px;
+  }
+
+  .segment-en {
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+
+  .segment-kr {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* ─── Expression Panel ─── */
+  .expression-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .expression-list {
+    padding: 12px;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .expression-item {
+    padding: 12px 14px;
+    background: var(--expression-bg);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    border-left: 3px solid var(--accent);
+  }
+
+  .expression-word {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--accent-light);
+    margin-bottom: 4px;
+  }
+
+  .expression-meaning {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .expression-example {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    padding: 6px 10px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 6px;
+  }
+
+  /* ─── Progress ─── */
+  .progress-bar-container {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--bg-elevated);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--kr-accent));
+    border-radius: 4px;
+    transition: width 0.3s;
+  }
+
+  /* ─── Loading state ─── */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 15, 0.9);
+    backdrop-filter: blur(10px);
+    z-index: 200;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .loading-overlay.active {
+    display: flex;
+  }
+
+  .loader {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-text {
+    color: var(--text-secondary);
+    font-size: 15px;
+  }
+
+  .loading-step {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 900px) {
+    .main-content.active {
+      grid-template-columns: 1fr;
+    }
+    .right-panel {
+      position: static;
+      max-height: none;
+    }
+  }
+
+  /* ─── Tooltip ─── */
+  .tooltip {
+    position: relative;
+  }
+
+  .tooltip::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    border: 1px solid var(--border);
+  }
+
+  .tooltip:hover::after {
+    opacity: 1;
+  }
+
+  /* ─── Tab Switcher ─── */
+  .tab-switcher {
+    display: flex;
+    gap: 4px;
+  }
+
+  .tab-btn {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active {
+    color: var(--text-primary);
+    background: var(--bg-elevated);
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">🎧</div>
+    <span>ShadowTube</span>
+  </div>
+  <div class="header-actions">
+    <button class="header-btn">📚 내 학습 기록</button>
+    <button class="header-btn">⚙️ 설정</button>
+  </div>
+</header>
+
+<!-- URL Input -->
+<section class="url-section" id="urlSection">
+  <h1 class="url-title">YouTube로 영어 쉐도잉 🎬</h1>
+  <p class="url-subtitle">영상 링크를 붙여넣으면, 구간별 스크립트 · 번역 · 핵심 표현이 자동으로 준비됩니다</p>
+  <div class="url-input-wrapper">
+    <input type="text" class="url-input" id="urlInput" placeholder="https://youtube.com/watch?v=..." />
+    <button class="url-submit" id="urlSubmit" onclick="loadVideo()">스크립트 추출</button>
+  </div>
+</section>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loading">
+  <div class="loader"></div>
+  <div class="loading-text">영상을 분석하고 있어요...</div>
+  <div class="loading-step" id="loadingStep">자막 추출 중...</div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content" id="mainContent">
+
+  <!-- Left: Video + Controls + Subtitle -->
+  <div class="video-section">
+
+    <div class="video-container" id="videoContainer">
+      <div class="video-placeholder" id="videoPlaceholder">
+        ▶
+        <span>영상이 여기 표시됩니다</span>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-bar">
+      <div class="control-group">
+        <span class="control-group-label">구간</span>
+        <button class="ctrl-btn icon-btn tooltip" data-tip="이전 구간" onclick="prevSegment()">⏮</button>
+        <button class="ctrl-btn icon-btn tooltip" data-tip="구간 반복" id="repeatBtn" onclick="toggleRepeat()">🔁</button>
+        <button class="ctrl-btn icon-btn tooltip" data-tip="다음 구간" onclick="nextSegment()">⏭</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="control-group">
+        <span class="control-group-label">속도</span>
+        <button class="ctrl-btn" onclick="changeSpeed(-0.1)">−</button>
+        <span class="speed-display" id="speedDisplay">1.0x</span>
+        <button class="ctrl-btn" onclick="changeSpeed(0.1)">+</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="control-group">
+        <span class="control-group-label">자막</span>
+        <button class="ctrl-btn" id="toggleEn" onclick="toggleSubtitle('en')">🇺🇸 EN</button>
+        <button class="ctrl-btn" id="toggleKr" onclick="toggleSubtitle('kr')">🇰🇷 KR</button>
+        <button class="ctrl-btn" onclick="toggleSubtitle('off')">OFF</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <button class="ctrl-btn tooltip" data-tip="전체 반복" onclick="toggleFullRepeat()" id="fullRepeatBtn">🔄 전체 반복</button>
+    </div>
+
+    <!-- Subtitle Display -->
+    <div class="subtitle-overlay">
+      <div class="subtitle-badge">
+        <span class="badge badge-en" id="badgeEn">EN</span>
+        <span class="badge badge-kr" id="badgeKr">KR</span>
+      </div>
+      <div class="subtitle-en" id="subtitleEn">
+        I think the most important thing is to <span class="highlight">stay curious</span> about everything.
+      </div>
+      <div class="subtitle-kr" id="subtitleKr">
+        가장 중요한 것은 모든 것에 대해 호기심을 유지하는 것이라고 생각합니다.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right-panel">
+
+    <!-- Segment List -->
+    <div class="segment-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="icon">📝</span> 구간 스크립트
+        </div>
+        <div class="tab-switcher">
+          <button class="tab-btn active">전체</button>
+          <button class="tab-btn">북마크</button>
+        </div>
+      </div>
+
+      <div class="segment-list" id="segmentList">
+        <!-- Segments will be populated by JS -->
+      </div>
+
+      <div class="progress-bar-container">
+        <div class="progress-info">
+          <span>학습 진행률</span>
+          <span id="progressText">3 / 12 구간 완료</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 25%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expressions -->
+    <div class="expression-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="icon">💡</span> 핵심 표현
+        </div>
+        <span class="panel-count" id="exprCount">3개</span>
+      </div>
+      <div class="expression-list" id="expressionList">
+        <!-- Expressions will be populated by JS -->
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ─── Demo Data ───
+  const demoSegments = [
+    {
+      id: 1, start: "0:00", end: "0:08",
+      en: "I think the most important thing is to stay curious about everything.",
+      kr: "가장 중요한 것은 모든 것에 대해 호기심을 유지하는 것이라고 생각합니다.",
+      highlight: "stay curious",
+      completed: true, repeatCount: 3
+    },
+    {
+      id: 2, start: "0:08", end: "0:15",
+      en: "When you're genuinely interested in learning, it doesn't feel like work at all.",
+      kr: "진심으로 배움에 관심이 있을 때, 그것은 전혀 일처럼 느껴지지 않습니다.",
+      highlight: "genuinely interested",
+      completed: true, repeatCount: 5
+    },
+    {
+      id: 3, start: "0:15", end: "0:24",
+      en: "I used to struggle with public speaking, but practice made a huge difference.",
+      kr: "저는 대중 앞에서 말하는 것이 힘들었지만, 연습이 큰 차이를 만들었습니다.",
+      highlight: "struggle with",
+      completed: true, repeatCount: 2
+    },
+    {
+      id: 4, start: "0:24", end: "0:33",
+      en: "The key is to break down complex problems into smaller, manageable pieces.",
+      kr: "핵심은 복잡한 문제를 더 작고 관리 가능한 조각으로 나누는 것입니다.",
+      highlight: "break down",
+      completed: false, repeatCount: 0
+    },
+    {
+      id: 5, start: "0:33", end: "0:41",
+      en: "Don't be afraid to make mistakes — that's how you grow as a person.",
+      kr: "실수를 두려워하지 마세요 — 그것이 사람으로서 성장하는 방법입니다.",
+      highlight: "be afraid to",
+      completed: false, repeatCount: 0
+    },
+    {
+      id: 6, start: "0:41", end: "0:50",
+      en: "I've found that consistency matters more than intensity in the long run.",
+      kr: "장기적으로는 강도보다 꾸준함이 더 중요하다는 것을 알게 되었습니다.",
+      highlight: "in the long run",
+      completed: false, repeatCount: 0
+    },
+    {
+      id: 7, start: "0:50", end: "0:58",
+      en: "It's essential to surround yourself with people who challenge your thinking.",
+      kr: "당신의 사고에 도전하는 사람들로 자신을 둘러싸는 것이 필수적입니다.",
+      highlight: "surround yourself with",
+      completed: false, repeatCount: 0
+    },
+    {
+      id: 8, start: "0:58", end: "1:07",
+      en: "One thing I wish I had known earlier is that failure is not the opposite of success.",
+      kr: "제가 더 일찍 알았더라면 하는 것은 실패가 성공의 반대가 아니라는 것입니다.",
+      highlight: "the opposite of",
+      completed: false, repeatCount: 0
+    },
+    {
+      id: 9, start: "1:07", end: "1:15",
+      en: "You have to be willing to step outside your comfort zone regularly.",
+      kr: "정기적으로 자신의 안전지대를 벗어나려는 의지가 있어야 합니다.",
+      highlight: "comfort zone",
+      completed: false, repeatCount: 0
+    },
+    {
+      id: 10, start: "1:15", end: "1:24",
+      en: "The most successful people I know are also the most persistent ones.",
+      kr: "제가 아는 가장 성공한 사람들은 또한 가장 끈기 있는 사람들입니다.",
+      highlight: "persistent",
+      completed: false, repeatCount: 0
+    },
+    {
+      id: 11, start: "1:24", end: "1:33",
+      en: "Learning a new language opens up a whole new way of seeing the world.",
+      kr: "새로운 언어를 배우는 것은 세상을 보는 완전히 새로운 방법을 열어줍니다.",
+      highlight: "opens up",
+      completed: false, repeatCount: 0
+    },
+    {
+      id: 12, start: "1:33", end: "1:42",
+      en: "At the end of the day, what matters is that you gave it your best shot.",
+      kr: "결국 중요한 것은 최선을 다했다는 것입니다.",
+      highlight: "at the end of the day",
+      completed: false, repeatCount: 0
+    }
+  ];
+
+  const demoExpressions = {
+    1: [
+      { word: "stay curious", meaning: "호기심을 유지하다", desc: "계속해서 새로운 것에 관심을 갖는 태도를 표현할 때 사용", example: "\"Stay curious and never stop learning.\"" },
+    ],
+    2: [
+      { word: "genuinely interested", meaning: "진심으로 관심이 있는", desc: "표면적이 아닌 진정한 관심을 나타낼 때. genuinely는 honestly와 비슷하지만 더 진정성 있는 뉘앙스", example: "\"She's genuinely interested in your project.\"" },
+    ],
+    3: [
+      { word: "struggle with", meaning: "~에 어려움을 겪다", desc: "무언가가 쉽지 않아서 힘들어하는 상황을 표현. have difficulty with 보다 더 자연스러운 구어체", example: "\"I still struggle with waking up early.\"" },
+      { word: "made a huge difference", meaning: "큰 차이를 만들다", desc: "어떤 것이 결과에 큰 영향을 미쳤을 때. 긍정적인 변화를 강조", example: "\"That one change made a huge difference.\"" },
+    ],
+    4: [
+      { word: "break down", meaning: "분해하다, 나누다", desc: "복잡한 것을 작은 단위로 나눌 때. 분석하다의 의미로도 자주 사용", example: "\"Let me break down the process for you.\"" },
+    ],
+    5: [
+      { word: "be afraid to", meaning: "~하는 것을 두려워하다", desc: "Don't be afraid to + 동사원형 패턴으로 격려할 때 자주 사용", example: "\"Don't be afraid to ask questions.\"" },
+    ],
+    6: [
+      { word: "in the long run", meaning: "장기적으로, 결국", desc: "단기가 아닌 장기적 관점을 이야기할 때. eventually와 비슷하지만 '시간이 지나면서'의 뉘앙스", example: "\"Exercise will benefit you in the long run.\"" },
+    ]
+  };
+
+  // ─── State ───
+  let currentSegment = 0;
+  let isRepeating = false;
+  let isFullRepeat = false;
+  let speed = 1.0;
+  let showEn = true;
+  let showKr = true;
+
+  // ─── Functions ───
+  function loadVideo() {
+    const url = document.getElementById('urlInput').value;
+    if (!url && !url.includes('youtu')) {
+      document.getElementById('urlInput').value = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+    }
+
+    const loading = document.getElementById('loading');
+    const loadingStep = document.getElementById('loadingStep');
+    loading.classList.add('active');
+
+    const steps = [
+      '자막 추출 중...',
+      '구간 분리 중...',
+      '한국어 번역 생성 중...',
+      '핵심 표현 분석 중...',
+      '완료! 학습을 시작하세요 🎉'
+    ];
+
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      if (i < steps.length) {
+        loadingStep.textContent = steps[i];
+      }
+      if (i >= steps.length) {
+        clearInterval(interval);
+        loading.classList.remove('active');
+        showMainContent();
+      }
+    }, 700);
+  }
+
+  function showMainContent() {
+    document.getElementById('urlSection').classList.add('minimized');
+    document.getElementById('mainContent').classList.add('active');
+    renderSegments();
+    selectSegment(0);
+  }
+
+  function renderSegments() {
+    const list = document.getElementById('segmentList');
+    list.innerHTML = demoSegments.map((seg, idx) => `
+      <div class="segment-item ${idx === currentSegment ? 'active' : ''} ${seg.completed ? 'completed' : ''}"
+           id="seg-${idx}" onclick="selectSegment(${idx})">
+        <div class="segment-time">
+          ${seg.start} — ${seg.end}
+          ${seg.repeatCount > 0 ? `<span class="repeat-count">🔁 ${seg.repeatCount}회</span>` : ''}
+        </div>
+        <div class="segment-en">${seg.en}</div>
+        <div class="segment-kr">${seg.kr}</div>
+      </div>
+    `).join('');
+  }
+
+  function selectSegment(idx) {
+    currentSegment = idx;
+    const seg = demoSegments[idx];
+
+    // Update subtitle
+    const enText = seg.en.replace(
+      seg.highlight,
+      `<span class="highlight">${seg.highlight}</span>`
+    );
+    document.getElementById('subtitleEn').innerHTML = enText;
+    document.getElementById('subtitleEn').className = `subtitle-en ${!showEn ? 'subtitle-hidden' : ''}`;
+    document.getElementById('subtitleKr').textContent = seg.kr;
+    document.getElementById('subtitleKr').className = `subtitle-kr ${!showKr ? 'subtitle-hidden' : ''}`;
+
+    // Update expressions
+    renderExpressions(seg.id);
+
+    // Update segment list highlight
+    document.querySelectorAll('.segment-item').forEach((el, i) => {
+      el.classList.toggle('active', i === idx);
+    });
+
+    // Scroll active segment into view
+    const activeEl = document.getElementById(`seg-${idx}`);
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Update progress
+    const completed = demoSegments.filter(s => s.completed).length;
+    document.getElementById('progressText').textContent = `${completed} / ${demoSegments.length} 구간 완료`;
+    document.getElementById('progressFill').style.width = `${(completed / demoSegments.length) * 100}%`;
+  }
+
+  function renderExpressions(segId) {
+    const exprs = demoExpressions[segId] || [];
+    const list = document.getElementById('expressionList');
+    document.getElementById('exprCount').textContent = `${exprs.length}개`;
+
+    if (exprs.length === 0) {
+      list.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">
+        이 구간에는 추출된 핵심 표현이 없습니다
+      </div>`;
+      return;
+    }
+
+    list.innerHTML = exprs.map(expr => `
+      <div class="expression-item">
+        <div class="expression-word">${expr.word}</div>
+        <div class="expression-meaning">${expr.meaning} — ${expr.desc}</div>
+        <div class="expression-example">${expr.example}</div>
+      </div>
+    `).join('');
+  }
+
+  function prevSegment() {
+    if (currentSegment > 0) selectSegment(currentSegment - 1);
+  }
+
+  function nextSegment() {
+    if (currentSegment < demoSegments.length - 1) selectSegment(currentSegment + 1);
+  }
+
+  function toggleRepeat() {
+    isRepeating = !isRepeating;
+    document.getElementById('repeatBtn').classList.toggle('active', isRepeating);
+  }
+
+  function toggleFullRepeat() {
+    isFullRepeat = !isFullRepeat;
+    document.getElementById('fullRepeatBtn').classList.toggle('active', isFullRepeat);
+  }
+
+  function changeSpeed(delta) {
+    speed = Math.max(0.5, Math.min(2.0, +(speed + delta).toFixed(1)));
+    document.getElementById('speedDisplay').textContent = speed.toFixed(1) + 'x';
+  }
+
+  function toggleSubtitle(type) {
+    if (type === 'en') {
+      showEn = !showEn;
+      document.getElementById('subtitleEn').classList.toggle('subtitle-hidden', !showEn);
+      document.getElementById('badgeEn').classList.toggle('off', !showEn);
+      document.getElementById('toggleEn').classList.toggle('active', showEn);
+    } else if (type === 'kr') {
+      showKr = !showKr;
+      document.getElementById('subtitleKr').classList.toggle('subtitle-hidden', !showKr);
+      document.getElementById('badgeKr').classList.toggle('off', !showKr);
+      document.getElementById('toggleKr').classList.toggle('active', showKr);
+    } else {
+      showEn = false;
+      showKr = false;
+      document.getElementById('subtitleEn').classList.add('subtitle-hidden');
+      document.getElementById('subtitleKr').classList.add('subtitle-hidden');
+      document.getElementById('badgeEn').classList.add('off');
+      document.getElementById('badgeKr').classList.add('off');
+      document.getElementById('toggleEn').classList.remove('active');
+      document.getElementById('toggleKr').classList.remove('active');
+    }
+  }
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return;
+    switch(e.key) {
+      case 'ArrowLeft': prevSegment(); break;
+      case 'ArrowRight': nextSegment(); break;
+      case 'r': toggleRepeat(); break;
+      case '-': changeSpeed(-0.1); break;
+      case '=': case '+': changeSpeed(0.1); break;
+    }
+  });
+</script>
+</body>
+</html>

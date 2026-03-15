@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 스크롤바 스타일 (다크 테마) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a26;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3a3a4a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4a4a5a;
+}
+
+/* 자막 하이라이트 스타일 */
+.subtitle-en mark {
+  background-color: rgba(99, 102, 241, 0.3);
+  color: #6366f1;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+/* 선택 스타일 */
+::selection {
+  background-color: rgba(99, 102, 241, 0.4);
+  color: #e8e8f0;
+}
+
+/* 부드러운 포커스 전환 */
+input:focus,
+button:focus {
+  outline: none;
+}
+
+/* YouTube Player 컨테이너 */
+#youtube-player {
+  width: 100%;
+  height: 100%;
+}
+
+#youtube-player iframe {
+  width: 100% !important;
+  height: 100% !important;
+}
