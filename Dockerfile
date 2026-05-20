@@ -3,7 +3,7 @@ FROM node:20-slim AS deps
 WORKDIR /app
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
 
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
@@ -13,7 +13,7 @@ RUN pnpm install --frozen-lockfile
 FROM node:20-slim AS builder
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
